@@ -1,0 +1,13 @@
+---
+BasedOnStyle: LLVM
+ColumnLimit: 100
+IndentWidth: 2
+PointerAlignment: Right
+IncludeBlocks: Regroup
+IncludeCategories:
+  - Regex: '^"|^<akdev/'
+    Priority: 1
+  - Regex: '^<gtest/|^<gmock/'
+    Priority: 2
+  - Regex: '^<.*>'
+    Priority: 3

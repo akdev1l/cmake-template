@@ -1,0 +1,62 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_call:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions:
+  contents: read
+
+env:
+  CONTAINER_ENGINE: docker
+
+jobs:
+  build:
+    name: Lint, build, test, docs
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Lint
+        run: ci/container.sh ci/lint.sh
+
+      - name: Build & test (debug)
+        run: ci/container.sh ci/test.sh debug
+
+      - name: Build & test (release)
+        run: ci/container.sh ci/test.sh release
+
+      - name: Docs
+        run: ci/container.sh ci/docs.sh
+
+      - name: Package (RPM)
+        run: ci/container.sh ci/package.sh
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: build/*/test-results.xml
+          if-no-files-found: ignore
+
+      - name: Upload docs
+        uses: actions/upload-artifact@v4
+        with:
+          name: docs
+          path: build/docs.tar.gz
+
+      - name: Upload RPMs
+        uses: actions/upload-artifact@v4
+        with:
+          name: rpms
+          path: |
+            build/rpm/RPMS/*/*.rpm
+            build/rpm/SRPMS/*.rpm

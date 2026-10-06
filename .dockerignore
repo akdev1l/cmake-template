@@ -1,0 +1,2 @@
+# Containerfile.builder copies nothing from the context; keep it empty.
+*
